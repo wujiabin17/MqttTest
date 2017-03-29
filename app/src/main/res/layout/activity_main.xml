@@ -1,0 +1,38 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+    <Button
+        android:id="@+id/publish"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="发布者"/>
+    <EditText
+        android:id="@+id/et_message"
+        android:layout_below="@id/publish"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="请输入发送的消息"/>
+    <Button
+        android:id="@+id/lock_bycle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/et_message"
+        android:enabled="false"
+        android:text ="开锁"/>
+    <TextView
+        android:id="@+id/tv_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:layout_below="@id/lock_bycle"/>
+    <ProgressBar
+        android:id="@+id/bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:max="100"
+        android:visibility="gone"
+        android:layout_below="@id/tv_bar"
+        style="@android:style/Widget.ProgressBar.Horizontal" />
+</RelativeLayout>
