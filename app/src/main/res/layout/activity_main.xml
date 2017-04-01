@@ -1,38 +1,61 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context=".MainActivity">
-    <Button
-        android:id="@+id/publish"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="发布者"/>
-    <EditText
-        android:id="@+id/et_message"
-        android:layout_below="@id/publish"
+    <LinearLayout
+        android:id = "@+id/ll_title1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="请输入发送的消息"/>
-    <Button
-        android:id="@+id/lock_bycle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/et_message"
-        android:enabled="false"
-        android:text ="开锁"/>
-    <TextView
-        android:id="@+id/tv_bar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:layout_below="@id/lock_bycle"/>
-    <ProgressBar
-        android:id="@+id/bar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:max="100"
-        android:visibility="gone"
-        android:layout_below="@id/tv_bar"
-        style="@android:style/Widget.ProgressBar.Horizontal" />
-</RelativeLayout>
+        android:visibility="visible"
+        android:orientation="vertical">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <EditText
+                android:id="@+id/et_message"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:hint="请输入发送的消息"/>
+            <Button
+                android:id="@+id/publish"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="发布者"/>
+        </LinearLayout>
+        <Button
+            android:id="@+id/lock_bycle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:enabled="false"
+            android:text ="开锁"/>
+        <TextView
+            android:id="@+id/tv_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
+        <ProgressBar
+            android:id="@+id/bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="100"
+            android:visibility="invisible"
+            style="@android:style/Widget.ProgressBar.Horizontal" />
+        <Button
+            android:id="@+id/location"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="定位"/>
+    </LinearLayout>
+
+   <!-- <include layout="@layout/bike_config_layout"></include>-->
+
+    <com.amap.api.maps.MapView
+        android:id="@+id/map"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:clickable="true" />
+</LinearLayout>

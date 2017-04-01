@@ -3,6 +3,10 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 25
     buildToolsVersion "25.0.2"
+    packagingOptions {
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/NOTICE'
+    }
     defaultConfig {
         applicationId "com.sprocomm.com.mqtttest"
         minSdkVersion 18
@@ -11,6 +15,7 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
+
     buildTypes {
         release {
             minifyEnabled false
@@ -18,6 +23,7 @@ android {
         }
     }
 }
+
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
@@ -28,4 +34,5 @@ dependencies {
     compile files("libs/org.eclipse.paho.android.service-1.1.1.jar")
     compile files("libs/org.eclipse.paho.client.mqttv3-1.1.1.jar")
     testCompile 'junit:junit:4.12'
+    compile 'com.google.android.gms:play-services-appindexing:8.4.0'
 }
