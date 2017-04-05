@@ -7,4 +7,9 @@
         android:icon="@mipmap/ic_overflow_24dp"
         android:showAsAction="never"
         android:title="settings"/>
+    <item
+        android:id="@+id/action_account"
+        android:icon="@mipmap/ic_overflow_24dp"
+        android:showAsAction="never"
+        android:title="account"/>
 </menu>

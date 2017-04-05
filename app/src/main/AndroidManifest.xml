@@ -25,7 +25,7 @@
 
         <service android:name="com.amap.api.location.APSService" />
 
-        <activity android:name=".MainActivity"/>
+        <activity android:name=".MainActivity" />
         <!--
  ATTENTION: This was auto-generated to add Google Play services to your project for
      App Indexing.  See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -36,13 +36,16 @@
 
         <activity android:name=".SecondActivity" />
         <activity
-            android:name="LoginActivity"
-            android:screenOrientation="portrait" >
+            android:name=".LoginActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".AccountSettingActivity" />
+        <activity android:name=".MenuActivity"></activity>
     </application>
 
 </manifest>
