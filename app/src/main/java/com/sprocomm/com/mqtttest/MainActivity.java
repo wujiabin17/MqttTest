@@ -4,6 +4,8 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.net.Uri;
@@ -11,10 +13,15 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.Settings;
+import android.provider.SyncStateContract;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Interpolator;
@@ -23,6 +30,7 @@ import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -39,17 +47,26 @@ import com.amap.api.maps.AMap;
 import com.amap.api.maps.CameraUpdateFactory;
 import com.amap.api.maps.LocationSource;
 import com.amap.api.maps.MapView;
+import com.amap.api.maps.MapsInitializer;
 import com.amap.api.maps.UiSettings;
 import com.amap.api.maps.model.BitmapDescriptorFactory;
 import com.amap.api.maps.model.CameraPosition;
+import com.amap.api.maps.model.Circle;
+import com.amap.api.maps.model.CircleOptions;
 import com.amap.api.maps.model.LatLng;
 import com.amap.api.maps.model.Marker;
 import com.amap.api.maps.model.MarkerOptions;
 import com.amap.api.maps.model.MyLocationStyle;
+import com.amap.api.maps.model.PolylineOptions;
 import com.amap.api.maps.model.Text;
 import com.amap.api.maps.model.animation.TranslateAnimation;
 import com.amap.api.services.core.AMapException;
 import com.amap.api.services.core.LatLonPoint;
+import com.amap.api.services.geocoder.GeocodeResult;
+import com.amap.api.services.geocoder.GeocodeSearch;
+import com.amap.api.services.geocoder.RegeocodeAddress;
+import com.amap.api.services.geocoder.RegeocodeQuery;
+import com.amap.api.services.geocoder.RegeocodeResult;
 import com.amap.api.services.route.BusRouteResult;
 import com.amap.api.services.route.DriveRouteResult;
 import com.amap.api.services.route.RideRouteResult;
@@ -62,6 +79,7 @@ import com.google.android.gms.appindexing.Thing;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.sprocomm.com.mqtttest.utils.AMapUtil;
 import com.sprocomm.com.mqtttest.utils.CoordinateUtil;
+import com.sprocomm.com.mqtttest.utils.OffLineMapUtils;
 import com.sprocomm.com.mqtttest.utils.ToastUtil;
 import com.sprocomm.com.mqtttest.utils.WalkRouteOverlay;
 
@@ -80,11 +98,12 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener, LocationSource, AMapLocationListener, AMap.OnMarkerClickListener, RouteSearch.OnRouteSearchListener {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener, LocationSource, AMapLocationListener, AMap.OnMarkerClickListener, RouteSearch.OnRouteSearchListener, GeocodeSearch.OnGeocodeSearchListener {
     private String host = "ssl://androidtest.mqtt.iot.gz.baidubce.com:1884";
     private String userName = "androidtest/test01";
     private String passWord = "3vx/JpnTxCx8ZXe/g/yZT8rKeZDkw9A01U83if46aZk=";
@@ -93,6 +112,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private int index = 0;
     private int mProgressStatus = 0;
     private MqttClient client;
+    private ExecutorService mExecutorService;
 
     private String myTopic = "test-iot-service";
     private String myTopic1 = "abc";
@@ -112,14 +132,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 if (index == 100) {
                     index = 0;
                 }
-                if (mess.startsWith("##,")) {
-                    String afterSubSymbol = mess.substring(3);
-                    int index1 = afterSubSymbol.indexOf(',');
-                    int index2 = afterSubSymbol.indexOf('&');
-                    bycleId = afterSubSymbol.substring(0, index1);
-                    cmd = afterSubSymbol.substring(index1 + 1, index2);
-                    openOrCloseLock(bycleId, cmd);
-                } else if (mess.startsWith("#555,")) {
+             if (mess.startsWith("#555,")) {
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
@@ -132,7 +145,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             double parseLng = Double.parseDouble(lng);
                             for (i = 1; i < 3; i++) {
                                 double saveLat = -0.0005 * i + parseLat;
-                                double saveLng = -0.0009 * i + parseLng;
+                                double saveLng = 0.0009 * i + parseLng;
                                 MqttMessage message = new MqttMessage();
                                 String roundPosition = "#333," + saveLat + "," + saveLng + "&&";
                                 message.setPayload(roundPosition.getBytes());
@@ -143,8 +156,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 }
                             }
                             for (int j = 1; j < 3; j++) {
-                                double saveLat = 0.0004 * j + parseLat;
-                                double saveLng = 0.001 * j + parseLng;
+                                double saveLat = 0.001 * j + parseLat;
+                                double saveLng = -0.001 * j + parseLng;
                                 MqttMessage message = new MqttMessage();
                                 String roundPosition = "#333," + saveLat + "," + saveLng + "&&";
                                 message.setPayload(roundPosition.getBytes());
@@ -209,22 +222,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private MarkerOptions markerOption;
     private Marker marker;
     private Button btLocation;
-    /**
-     * ATTENTION: This was auto-generated to implement the App Indexing API.
-     * See https://g.co/AppIndexing/AndroidStudio for more information.
-     */
-    private GoogleApiClient client2;
     private MapView mMapView;
     private RouteSearch routeSearch;
     private ProgressDialog progDialog;
     private AMap aMap;
-    private AMap abc;
     private TextView tv_money;
     private TextView tv_distance;
     private TextView tv_minute;
-    private LinearLayout ll_one_title;
-    private LinearLayout ll_two_title;
     private TextView tv_location;
+    private int minute_dur;
+    private int dis_mute;
+    private LinearLayout llBikeConfig;
+    private Circle circle;
+    private ImageView btRefrest;
+    private ActionBar actionBar;
+    private TextView tvActionTitle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -240,27 +252,39 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         }).start();
         mMapView.onCreate(savedInstanceState);
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client2 = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_activity_menu, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_settings:
+                Intent intent  = new Intent(MainActivity.this,SecondActivity.class);
+                startActivity(intent);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     private void initView() {
-        etMessage = (EditText) findViewById(R.id.et_message);
-        btPublish = (Button) findViewById(R.id.publish);
-        btPublish.setOnClickListener(this);
-        btLock = (Button) findViewById(R.id.lock_bycle);
-        bar = (ProgressBar) findViewById(R.id.bar);
+
         mMapView = (MapView) findViewById(R.id.map);
-        tvBar = (TextView) findViewById(R.id.tv_bar);
-        btLocation = (Button) findViewById(R.id.location);
+        llBikeConfig = (LinearLayout) findViewById(R.id.ll_title2);
+        btLocation = (Button) findViewById(R.id.bt_location);
         btLocation.setOnClickListener(this);
-//        tv_money = (TextView) findViewById(R.id.tv_money_num);
-//        tv_distance = (TextView) findViewById(R.id.tv_distance);
-//        tv_minute = (TextView) findViewById(R.id.tv_go_time);
-//        ll_one_title = (LinearLayout) findViewById(R.id.ll_title1);
-//        ll_two_title =(LinearLayout) findViewById(R.id.ll_title2);
-//        tv_location =(TextView) findViewById(R.id.location_name);
+        btRefrest = (ImageView) findViewById(R.id.iv_refresh);
+        btRefrest.setOnClickListener(this);
+        tv_money = (TextView) findViewById(R.id.tv_money_num);
+        tv_distance = (TextView)findViewById(R.id.tv_distance);
+        tv_minute = (TextView)findViewById(R.id.tv_go_time);
+        tv_location =(TextView) findViewById(R.id.location_name);
         //初始化地图控制器对象
         aMap = mMapView.getMap();
         aMap.setMapType(AMap.MAP_TYPE_NORMAL);
@@ -279,9 +303,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // 设置定位的类型为定位模式，有定位、跟随或地图根据面向方向旋转几种
         mUiSettings = aMap.getUiSettings();
         mToast = Toast.makeText(this, "", Toast.LENGTH_SHORT);
+        MapsInitializer.sdcardDir = OffLineMapUtils.getSdCacheDir(this);
         aMap.setOnMapLoadedListener(new AMap.OnMapLoadedListener() {
             @Override
             public void onMapLoaded() {
+                llBikeConfig.setVisibility(View.GONE);
                 addMarkerInScreenCenter();
             }
         });
@@ -299,54 +325,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
         routeSearch = new RouteSearch(this);
         routeSearch.setRouteSearchListener(this);
-    }
-
-
-    private void openOrCloseLock(String bycleId, String cmd) {
-        String btLockText = btLock.getText().toString();
-        if (btLockText.equalsIgnoreCase("关锁")) {
-            if (bycleId.equalsIgnoreCase(androidId) && cmd.equalsIgnoreCase("unlock")) {
-                Toast.makeText(getApplicationContext(), "小车已经开锁了,请关锁后再开....", Toast.LENGTH_SHORT).show();
-            } else if (bycleId.equalsIgnoreCase(androidId) && cmd.equalsIgnoreCase("lock")) {
-                Toast.makeText(getApplicationContext(), "正在关锁中", Toast.LENGTH_SHORT).show();
-                btLock.setText("开锁");
-            }
-        } else if (btLockText.equalsIgnoreCase("开锁")) {
-            if (bycleId.equalsIgnoreCase(androidId) && cmd.equalsIgnoreCase("unlock")) {
-                Toast.makeText(getApplicationContext(), "正在开锁中", Toast.LENGTH_LONG).show();
-                btLock.setText("正在开锁中...");
-                tvBar.setVisibility(View.VISIBLE);
-                bar.setVisibility(View.VISIBLE);
-                new Thread() {
-                    @Override
-                    public void run() {
-                        // TODO Auto-generated method stub
-                        super.run();
-                        while (index < 100) {
-                            doWork();
-                            Message msg = new Message();
-                            msg.what = 4;
-                            handler.sendMessage(msg);
-                        }
-                    }
-                }.start();
-            } else if (bycleId.equalsIgnoreCase(androidId) && cmd.equalsIgnoreCase("lock")) {
-                Toast.makeText(getApplicationContext(), "小车已经关锁,不用再关了....", Toast.LENGTH_SHORT).show();
-            }
-        } else if (btLockText.equalsIgnoreCase("正在开锁中...")) {
-            Toast.makeText(getApplicationContext(), "正在开锁中,请稍等...", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    private int doWork() {
-        index++;
-        try {
-            Thread.sleep(200);
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        return index;
+        geocoderSearch = new GeocodeSearch(this);
+        geocoderSearch.setOnGeocodeSearchListener(this);
     }
 
     private void startReconnect() {
@@ -460,17 +440,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     e.printStackTrace();
                 }
                 break;
-            case R.id.location:
-                LatLng latLng = new LatLng(mMapLocation.getLatitude(), mMapLocation.getLongitude());
-                String markerPosition = "#555," + latLng.latitude + "," + latLng.longitude + "&&";
-                MqttMessage message1 = new MqttMessage();
-                message1.setPayload(markerPosition.getBytes());
-                try {
-                    client.publish("abc", message1);
-                } catch (MqttException e) {
-                    e.printStackTrace();
+            case R.id.bt_location:
+                if (mMapLocation != null) {
+                    LatLng latLng = new LatLng(mMapLocation.getLatitude(), mMapLocation.getLongitude());
+                    setUpMap();
+                    String markerPosition = "#555," + latLng.latitude + "," + latLng.longitude + "&&";
+                    MqttMessage message1 = new MqttMessage();
+                    message1.setPayload(markerPosition.getBytes());
+                    try {
+                        client.publish("abc", message1);
+                    } catch (MqttException e) {
+                        e.printStackTrace();
+                    }
+                    aMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 17));
+                } else {
+                    ToastUtil.show(this, "定位不成功");
                 }
-                aMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 17));
+                break;
+            case R.id.iv_refresh:
+                aMap.clear();
+                addMarkerInScreenCenter();
+                llBikeConfig.setVisibility(View.GONE);
+
+                break;
             default:
                 break;
         }
@@ -498,13 +490,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onStop() {
         // TODO Auto-generated method stub
-        super.onStop();// ATTENTION: This was auto-generated to implement the App Indexing API.
-// See https://g.co/AppIndexing/AndroidStudio for more information.
-        AppIndex.AppIndexApi.end(client2, getIndexApiAction());
-        mLocationClient.stopLocation();
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client2.disconnect();
+        super.onStop();
     }
 
     @Override
@@ -688,6 +674,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         final RouteSearch.FromAndTo fromAndTo = new RouteSearch.FromAndTo(startPoint, endPoint);
         RouteSearch.WalkRouteQuery query = new RouteSearch.WalkRouteQuery(fromAndTo, walkMode);
         routeSearch.calculateWalkRouteAsyn(query);
+        getAddress(endPoint);
     }
     /**
      * 在地图上添加marker
@@ -713,30 +700,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         screenMarker.setPositionByPixels(screenPosition.x, screenPosition.y);
     }
 
-    /**
-     * ATTENTION: This was auto-generated to implement the App Indexing API.
-     * See https://g.co/AppIndexing/AndroidStudio for more information.
-     */
-    public Action getIndexApiAction() {
-        Thing object = new Thing.Builder()
-                .setName("Main Page") // TODO: Define a title for the content shown.
-                // TODO: Make sure this auto-generated URL is correct.
-                .setUrl(Uri.parse("http://[ENTER-YOUR-URL-HERE]"))
-                .build();
-        return new Action.Builder(Action.TYPE_VIEW)
-                .setObject(object)
-                .setActionStatus(Action.STATUS_TYPE_COMPLETED)
-                .build();
-    }
-
     @Override
     public void onStart() {
         super.onStart();
-
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client2.connect();
-        AppIndex.AppIndexApi.start(client2, getIndexApiAction());
     }
 
     @Override
@@ -754,8 +720,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         dissmissProgressDialog();
         aMap.clear();
         if (errorCode == AMapException.CODE_AMAP_SUCCESS) {
-//            ll_one_title.setVisibility(View.GONE);
-//            ll_two_title.setVisibility(View.VISIBLE);
+            llBikeConfig.setVisibility(View.VISIBLE);
             if (result != null && result.getPaths() != null) {
                 if (result.getPaths().size() > 0) {
                     mWalkRouteResult = result;
@@ -770,8 +735,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     walkRouteOverlay.zoomToSpan();
                     int dis = (int) walkPath.getDistance();
                     int dur = (int) walkPath.getDuration();
-//                    tv_minute.setText(Integer.parseInt(AMapUtil.getFriendlyTime(dur))/60);
-//                    tv_distance.setText(Integer.parseInt(AMapUtil.getFriendlyLength(dis)));
+                    String durTime = AMapUtil.getFriendlyTime(dur);
+                    String disLength = AMapUtil.getFriendlyLength(dis);
+                    tv_minute.setText(durTime);
+                    tv_distance.setText(disLength);
                     String des = AMapUtil.getFriendlyTime(dur)+"("+AMapUtil.getFriendlyLength(dis)+")";
                 } else if (result != null && result.getPaths() == null) {
                     ToastUtil.show(this, R.string.no_result);
@@ -782,11 +749,47 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } else {
             ToastUtil.showerror(this.getApplicationContext(), errorCode);
         }
-        addMarkerInScreenCenter();
     }
 
     @Override
     public void onRideRouteSearched(RideRouteResult rideRouteResult, int i) {
 
+    }
+    private GeocodeSearch geocoderSearch;
+    /**
+     * 响应逆地理编码
+     */
+    public void getAddress(final LatLonPoint latLonPoint) {
+        RegeocodeQuery query = new RegeocodeQuery(latLonPoint, 200,
+                GeocodeSearch.AMAP);// 第一个参数表示一个Latlng，第二参数表示范围多少米，第三个参数表示是火系坐标系还是GPS原生坐标系
+        geocoderSearch.getFromLocationAsyn(query);// 设置异步逆地理编码请求
+    }
+
+    @Override
+    public void onRegeocodeSearched(RegeocodeResult result, int rCode) {
+        if (rCode == AMapException.CODE_AMAP_SUCCESS) {
+            if (result != null && result.getRegeocodeAddress() != null
+                    && result.getRegeocodeAddress().getFormatAddress() != null) {
+                String addressName = result.getRegeocodeAddress().getFormatAddress();
+                tv_location.setText(addressName);
+            } else {
+                ToastUtil.show(MainActivity.this, R.string.no_result);
+            }
+        } else {
+            ToastUtil.showerror(this, rCode);
+        }
+    }
+
+    @Override
+    public void onGeocodeSearched(GeocodeResult geocodeResult, int i) {
+
+    }
+    private void setUpMap() {
+         LatLng alatLng =  new LatLng(mMapLocation.getLatitude(),mMapLocation.getLongitude());
+        // 绘制一个圆形
+        circle = aMap.addCircle(new CircleOptions().center(alatLng)
+                .radius(350).strokeColor(Color.argb(25, 1, 1, 1))
+                .fillColor(Color.argb(25, 1, 1, 1)).strokeWidth(1));
+        //画虚线圆
     }
 }

@@ -75,7 +75,7 @@ public class AMapUtil {
 
 		if (lenMeter > 100) {
 			int dis = lenMeter / 50 * 50;
-			return dis + ChString.Meter;
+			return dis +"";
 		}
 
 		int dis = lenMeter / 10 * 10;
@@ -83,7 +83,7 @@ public class AMapUtil {
 			dis = 10;
 		}
 
-		return dis + ChString.Meter;
+		return dis + "";
 	}
 
 	public static boolean IsEmptyOrNullString(String s) {
@@ -136,7 +136,7 @@ public class AMapUtil {
 		}
 		if (second >= 60) {
 			int miniate = second / 60;
-			return miniate + "分钟";
+			return miniate + "";
 		}
 		return second + "秒";
 	}

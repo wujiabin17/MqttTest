@@ -1,4 +1,8 @@
 <resources>
-    <string name="app_name">MqttTest</string>
+    <string name="app_name">"好骑单车"</string>
     <string name="no_result">对不起，没有搜索到相关数据！</string>
+    <!-- Sign in -->
+    <string name="sign_in_title">登录</string>
+    <!-- Sign up -->
+    <string name="sign_up_title">注册</string>
 </resources>

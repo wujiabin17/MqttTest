@@ -4,58 +4,32 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".MainActivity">
-    <LinearLayout
-        android:id = "@+id/ll_title1"
+
+    <include layout="@layout/bike_config_layout"/>
+
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="visible"
-        android:orientation="vertical">
-        <LinearLayout
+        android:layout_height="match_parent">
+        <com.amap.api.maps.MapView
+            android:id="@+id/map"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-            <EditText
-                android:id="@+id/et_message"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:hint="请输入发送的消息"/>
-            <Button
-                android:id="@+id/publish"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="发布者"/>
-        </LinearLayout>
+            android:layout_height="match_parent"
+            android:clickable="true" />
         <Button
-            android:id="@+id/lock_bycle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:enabled="false"
-            android:text ="开锁"/>
-        <TextView
-            android:id="@+id/tv_bar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="gone" />
-        <ProgressBar
-            android:id="@+id/bar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:max="100"
-            android:visibility="invisible"
-            style="@android:style/Widget.ProgressBar.Horizontal" />
-        <Button
-            android:id="@+id/location"
+            android:id="@+id/bt_location"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="定位"/>
-    </LinearLayout>
-
-   <!-- <include layout="@layout/bike_config_layout"></include>-->
-
-    <com.amap.api.maps.MapView
-        android:id="@+id/map"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:clickable="true" />
+        <ImageView
+            android:id="@+id/iv_refresh"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="40dp"
+            android:layout_marginLeft="10dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src ="@mipmap/ic_refresh" />
+    </RelativeLayout>
 </LinearLayout>
