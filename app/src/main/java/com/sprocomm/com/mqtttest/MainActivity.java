@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.ImageButton;
 
 import com.sprocomm.com.mqtttest.fragment.MapFragment;
+import com.sprocomm.com.mqtttest.widget.SecondTopBar;
 
 public class MainActivity extends FragmentActivity implements View.OnClickListener {
     private static final String FRAGMENT_CONTENT = "fragment_content";
@@ -16,6 +17,8 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
     private ImageButton MenuSetting;
     private FragmentManager fm;
     private FragmentTransaction transaction;
+    private SecondTopBar mTopBar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,12 +36,11 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         // Fragment leftMenuFragment = fm.findFragmentByTag(FRAGMENT_LEFT_MENU);
     }
     private void initView() {
-        MenuImage = (ImageButton)findViewById(R.id.btn_menu);
-        MenuSetting = (ImageButton)findViewById(R.id.btn_settings);
+        mTopBar = (SecondTopBar) findViewById(R.id.second_top_bar);
     }
     private void initEvent(){
-        MenuImage.setOnClickListener(this);
-        MenuSetting.setOnClickListener(this);
+        mTopBar.setOnMenuOnListener(this);
+        mTopBar.setOnSettingListener(this);
     }
 
     @Override
@@ -56,6 +58,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
                 break;
         }
     }
+
 
     public MapFragment getContentFragment() {
         FragmentManager fm = getSupportFragmentManager();

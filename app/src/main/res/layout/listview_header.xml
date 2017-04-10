@@ -6,7 +6,7 @@
     <ImageView
         android:id="@+id/layout_header_image"
         android:layout_width="match_parent"
-        android:layout_height="150dp"
+        android:layout_height="210dp"
         android:scaleType="centerCrop"
         android:src="@mipmap/first_bike" />
 </RelativeLayout>
