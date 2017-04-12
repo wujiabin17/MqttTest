@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.ImageButton;
 
 import com.sprocomm.com.mqtttest.fragment.MapFragment;
+import com.sprocomm.com.mqtttest.utils.ToastUtil;
 import com.sprocomm.com.mqtttest.widget.SecondTopBar;
 
 public class MainActivity extends FragmentActivity implements View.OnClickListener {
@@ -18,6 +19,10 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
     private FragmentManager fm;
     private FragmentTransaction transaction;
     private SecondTopBar mTopBar;
+    private static final int RESULT_FROM_CAPTURE_ACTIVITY = 1;
+    private static final String RETURN_BYCLE_ID = "return_bycle_id";
+    private static final String CONNECT_IP = "112.64.126.122";
+    private static final int CONNECT_PORT = 7088;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +47,24 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         mTopBar.setOnMenuOnListener(this);
         mTopBar.setOnSettingListener(this);
     }
+/*    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
+            case RESULT_FROM_CAPTURE_ACTIVITY:
+                if (data == null) {
+                    return;
+                }
+                String returnBycleId = data.getStringExtra(RETURN_BYCLE_ID);
+                if (returnBycleId != null) {
+                    if (returnBycleId.length() == 15) {
+                        send("##" + returnBycleId+ ",202&&");
+                    } else {
+                        ToastUtil.show(mContext,"验证码错误,请重新扫码");
+                    }
+                }
+        }
+    }*/
 
     @Override
     public void onClick(View view) {

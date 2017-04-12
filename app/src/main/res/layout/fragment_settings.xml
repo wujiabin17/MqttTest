@@ -2,12 +2,19 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_marginTop="48dp"
     tools:context="com.sprocomm.com.mqtttest.fragment.menu_detail.SettingsFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <com.sprocomm.com.mqtttest.widget.ParallaxScollListView
+        android:id="@+id/lv_settings"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:cacheColorHint="@null"
+        android:duplicateParentState="true"
+        android:scrollingCache="false"
+        android:headerDividersEnabled="false"
+        android:footerDividersEnabled="false"
+        android:overScrollMode="never"
+        android:scrollbars="none" />
 
 </FrameLayout>

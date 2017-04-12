@@ -26,7 +26,6 @@ public class MCDBOpenHelper extends SQLiteOpenHelper {
 	@Override
 	public void onCreate(SQLiteDatabase db) {
 		db.execSQL(MobileCycleDB.Account.SQL_CREATE_TABLE);
-		db.execSQL(MobileCycleDB.BackTask.SQL_CREATE_TABLE);
 	}
 
 	@Override

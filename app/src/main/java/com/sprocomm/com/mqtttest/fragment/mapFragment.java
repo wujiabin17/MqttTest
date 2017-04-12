@@ -3,6 +3,8 @@ package com.sprocomm.com.mqtttest.fragment;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.os.Bundle;
@@ -54,6 +56,7 @@ import com.amap.api.services.route.RideRouteResult;
 import com.amap.api.services.route.RouteSearch;
 import com.amap.api.services.route.WalkPath;
 import com.amap.api.services.route.WalkRouteResult;
+import com.sprocomm.com.mqtttest.CaptureActivity;
 import com.sprocomm.com.mqtttest.MainActivity;
 import com.sprocomm.com.mqtttest.R;
 import com.sprocomm.com.mqtttest.utils.AMapUtil;
@@ -70,12 +73,20 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
+import static android.content.Context.MODE_PRIVATE;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -107,6 +118,10 @@ public class MapFragment extends Fragment implements View.OnClickListener, Locat
     private String userName = "androidtest/test01";
     private String passWord = "3vx/JpnTxCx8ZXe/g/yZT8rKeZDkw9A01U83if46aZk=";
     private int[] randData = new int[100];
+    private static final int RESULT_FROM_CAPTURE_ACTIVITY = 1;
+    private static final String RETURN_BYCLE_ID = "return_bycle_id";
+    private static final String CONNECT_IP = "112.64.126.122";
+    private static final int CONNECT_PORT = 7088;
     private int index = 0;
     private int mProgressStatus = 0;
     private MqttClient client;
@@ -193,6 +208,9 @@ public class MapFragment extends Fragment implements View.OnClickListener, Locat
     private TextView tv_distance;
     private TextView tv_minute;
     private TextView tv_location;
+    private SharedPreferences mPfs;
+    private Socket mSocket = null;
+    private Button btnScan;
 
     public MapFragment() {
         // Required empty public constructor
@@ -219,6 +237,7 @@ public class MapFragment extends Fragment implements View.OnClickListener, Locat
     private void initEvent() {
         btLocation.setOnClickListener(this);
         btRefrest.setOnClickListener(this);
+        mPfs = mContext.getSharedPreferences(mContext.getPackageName(), MODE_PRIVATE);
     }
     @Override
     public void onSaveInstanceState(Bundle outState) {
@@ -237,6 +256,8 @@ public class MapFragment extends Fragment implements View.OnClickListener, Locat
         tv_location =(TextView)view.findViewById(R.id.location_name);
         llBikeConfig = (LinearLayout) view.findViewById(R.id.ll_title2);
         llBikeConfig.setVisibility(View.GONE);
+        btnScan = (Button) view.findViewById(R.id.btn_scan);
+        btnScan.setOnClickListener(this);
         androidId = Settings.Secure.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID);
         aMap = mMapView.getMap();
         aMap.setMapType(AMap.MAP_TYPE_NORMAL);
@@ -328,6 +349,10 @@ public class MapFragment extends Fragment implements View.OnClickListener, Locat
                 aMap.clear();
                 llBikeConfig.setVisibility(View.GONE);
                 addMarkerInScreenCenter();
+                break;
+
+            case R.id.btn_scan:
+                startActivity(new Intent(mContext, CaptureActivity.class));
                 break;
             default:
                 break;
@@ -673,6 +698,78 @@ public class MapFragment extends Fragment implements View.OnClickListener, Locat
         }, 0 * 1000, 10 * 1000, TimeUnit.MILLISECONDS);
     }
 
+  /*  private void send(String msg) {
+        if (mSocket != null) {
+            try {
+                OutputStream out = mSocket.getOutputStream();
+                if (out != null) {
+                    out.write(msg.getBytes());
+                    out.flush();
+                    return;
+                } else {
+                    Log.i("simon", "output stream null");
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        showErrorConnectToast();
+    }
+    private void showErrorConnectToast() {
+        Toast.makeText(mContext, R.string.no_connect_to_server, Toast.LENGTH_SHORT).show();
+    }
+*/
+    /*private void receiveMsg() {
+        if (mSocket != null) {
+            try {
+                InputStream in = mSocket.getInputStream();
+                if (in != null) {
+                    byte[] buffer = new byte[1024];
+                    int count = in.read(buffer);
+                    if (count == 0) {
+                        return;
+                    }
+                    String bufferToString = new String(buffer);
+                    String realMessage = bufferToString.substring(0, count);
+                    Log.d("wjb sprocomm", "realMessage:" + realMessage);
+                    Message message = handler.obtainMessage();
+                    message.obj = realMessage;
+                    message.what = RECEIVE_FROM_SERVER;
+                    handler.sendMessage(message);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void connectSocket() {
+        final String ip = CONNECT_IP;
+        final int port = CONNECT_PORT;
+
+        Thread thread = new Thread() {
+            @Override
+            public void run() {
+                try {
+                    mSocket = new Socket(InetAddress.getByName(ip), port);
+                    if (mSocket.isConnected()) {
+                        handler.sendEmptyMessage(BUTTON_STATE);
+                        while (true) {
+                            receiveMsg();
+                        }
+                    }
+                } catch (UnknownHostException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+        thread.start();
+    }
+*/
     @Override
     public void onStart() {
         super.onStart();
