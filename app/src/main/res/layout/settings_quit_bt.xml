@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginTop="30dp"
+    android:background="@color/bg_gray"
+    android:orientation="vertical">
+    <View android:layout_width="match_parent"
+        android:layout_height="20dp" />
+    <Button
+        android:id="@+id/btn_quit_account"
+        android:layout_below="@id/lv_settings"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="20dp"
+        android:layout_marginLeft="20dp"
+        android:textColor="@color/white"
+        android:background="@android:color/holo_red_light"
+        android:text="退出账号"/>
+</LinearLayout>
