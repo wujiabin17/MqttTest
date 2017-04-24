@@ -29,6 +29,7 @@ public class MenuActivity extends Activity implements View.OnClickListener, AbsL
     private ArrayList<String> personItem = new ArrayList<String>();
     private static final int TYPE_OPERATIO_PARAMETERS = 1;
     private static final int TYPE_USER_CONFIG = 2;
+    private static final int TYPE_DRIVED = 3;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,12 +50,13 @@ public class MenuActivity extends Activity implements View.OnClickListener, AbsL
         mListView.setParallaxImageView(mImageView);
         mListView.addHeaderView(header);
         mListView.setOnScrollListener(this);
-
-        String[] my = {"","我的钱包","我的优惠","我的行程","我的消息","邀请好友","用户指南","设置"};
+        startService(new Intent(this,OpenScreenService.class));
+        String[] my = {"","我的钱包","我的优惠","我的行程","","我的消息","邀请好友","用户指南","设置"};
         personConfigAdapter personAdapter = new personConfigAdapter(this);
         for(int i = 0; i<my.length; i++){
             personItem.add(my[i]);
         }
+
         mListView.setAdapter(personAdapter);
         mListView.setOnItemClickListener(this);
     }
@@ -74,7 +76,7 @@ public class MenuActivity extends Activity implements View.OnClickListener, AbsL
     @Override
     public void onScroll(AbsListView absListView, int i, int i1, int i2) {
         Log.d("wjb simon","i:" + i+" i1:" + i1 + " i2:" + i2);
-        if(i > 0 || i1 >7){
+        if(i > 0 || i1 >9){
             mTopBar.setTitle("个人中心");
         }else{
             mTopBar.setTitle("好奇单车");
@@ -85,6 +87,8 @@ public class MenuActivity extends Activity implements View.OnClickListener, AbsL
     public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
         if(position == 1) {
             return;
+        }else if(position > 5){
+            position = position -1;
         }
         Intent intent  = new Intent(this,MenuDetailActivity.class);
         intent.putExtra("detail_menu",position);
@@ -102,7 +106,9 @@ public class MenuActivity extends Activity implements View.OnClickListener, AbsL
         public int getItemViewType(int position) {
             if (position == 0) {
                 return TYPE_OPERATIO_PARAMETERS;
-            } else {
+            } else if(position == 4){
+                return TYPE_DRIVED;
+            } else{
                 return TYPE_USER_CONFIG;
             }
         }
@@ -138,7 +144,10 @@ public class MenuActivity extends Activity implements View.OnClickListener, AbsL
                     viewHolder = (ViewHolder) convertView.getTag();
                 }
                 viewHolder.tv_my.setText(personItem.get(position));
-            } else if (getItemViewType(position) == TYPE_OPERATIO_PARAMETERS) {
+            }else if(getItemViewType(position) == TYPE_DRIVED){
+                convertView = View.inflate(mContext,
+                        R.layout.driver_layout, null);
+            }else if (getItemViewType(position) == TYPE_OPERATIO_PARAMETERS) {
                 if (convertView == null) {
                     convertView  = View.inflate(mContext,R.layout.paramenters_operatio_layout,null);
                     TextView tv_cycle_dur = (TextView) convertView.findViewById(R.id.tv_cycling_dur);

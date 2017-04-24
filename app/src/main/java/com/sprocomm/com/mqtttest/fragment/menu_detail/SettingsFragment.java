@@ -82,7 +82,6 @@ public class SettingsFragment extends Fragment implements AdapterView.OnItemClic
             case 2:
                 showDialog();
                 break;
-
         }
     }
     protected void showQuitAccountDialog() {
